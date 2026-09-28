@@ -8,27 +8,40 @@
 <style>
 *{box-sizing:border-box}body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Tahoma,sans-serif;background:#e5e7e9;color:#20262b}
 header{background:linear-gradient(135deg,#ffffff 0%,#eceeef 62%,#d7dadd 100%);color:#34383d;min-height:92px;padding:14px 22px;border-bottom:4px solid #f47b20;display:flex;justify-content:space-between;align-items:center}
-header h1{font-size:22px;margin:0;padding-left:10px;line-height:1.35}.badge{background:#f47b20;color:#fff;padding:5px 9px;border-radius:999px;font-size:12px}
+.header-brand{display:flex;align-items:center;gap:14px}
+.header-logo{height:55px;width:auto;object-fit:contain}
+header h1{font-size:20px;margin:0;line-height:1.35;color:#34383d}
+.badge{background:#f47b20;color:#fff;padding:5px 9px;border-radius:999px;font-size:12px}
 nav{display:flex;gap:8px;padding:9px 14px;background:#34383d}
 button{border:0;border-radius:9px;padding:9px 13px;cursor:pointer;font-weight:650}.nav{background:transparent;color:#fff}.nav.active{background:#f47b20;color:#fff}
 main{max-width:1150px;margin:18px auto;padding:0 14px}.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:14px}
 .card{background:#fff;border:1px solid #d2d5d8;border-radius:14px;padding:16px;box-shadow:0 3px 12px rgba(0,0,0,.07)}
 h2{font-size:18px;margin:0 0 12px;border-left:5px solid #f47b20;padding-left:10px}.muted{color:#667085;font-size:13px}.row{display:flex;justify-content:space-between;align-items:center;padding:9px 0;border-bottom:1px solid #eee}
 select,input{width:100%;padding:9px;border:1px solid #cbd5df;border-radius:8px;margin-top:5px}label{display:block;margin:8px 0;font-size:14px}
-.primary{background:#f47b20;color:#fff}.success{background:#2f9e5b;color:#fff}.danger{background:#c62828;color:#fff}
+.primary{background:#f47b20;color:#fff}.success{background:#2f9e5b;color:#fff}.danger{background:#c62828;color:#fff}.secondary{background:#6c757d;color:#fff}
 .hidden{display:none}.notice{padding:10px;border-radius:8px;background:#f0f1f2;margin-top:10px;font-size:13px}
 .pills{display:flex;flex-wrap:wrap;gap:7px;margin:10px 0}.pill{background:#eceeef;border:0;border-radius:9px;padding:9px 13px;cursor:pointer}.pill.sel{background:#f47b20;color:#fff}
 .status{padding:5px 8px;border-radius:7px;font-size:12px;font-weight:700}.ok{background:#e7f6ec;color:#24733e}.wait{background:#fff4d6;color:#815b08}.error{background:#fde8e8;color:#9b1c1c}
 table{width:100%;border-collapse:collapse}th,td{text-align:left;padding:8px;border-bottom:1px solid #eee;font-size:13px}th{background:#f0f1f2}
 .member{display:grid;grid-template-columns:1fr auto;gap:8px;align-items:center;padding:8px 0;border-bottom:1px solid #eee}
 .actions{display:flex;flex-wrap:wrap;gap:8px}
+
+/* Modal Confirmation Box Style */
+.modal-overlay{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.5);display:flex;justify-content:center;align-items:center;z-index:999}
+.modal-content{background:#fff;padding:24px;border-radius:14px;max-width:450px;width:90%;box-shadow:0 4px 20px rgba(0,0,0,0.2)}
+.confirm-box{background:#f9fafb;border:1px solid #e5e7eb;padding:12px;border-radius:8px;margin:12px 0}
+.confirm-box div{margin-bottom:6px;font-size:14px}
 </style>
 </head>
 <body>
 <header>
-  <h1>📍 ระบบเช็คชื่อเข้าเรียนด้วย GPS (มทส.)</h1>
-  <span class="badge">SUT GPS v1</span>
+  <div class="header-brand">
+    <img src="https://upload.wikimedia.org/wikipedia/th/c/c2/SUT_logo.png" alt="SUT Logo" class="header-logo">
+    <h1>ระบบเช็คชื่อเข้าเรียน มหาวิทยาลัยเทคโนโลยีสุรนารี</h1>
+  </div>
+  <span class="badge">SUT GPS v2</span>
 </header>
+
 <nav>
   <button class="nav active" onclick="show('admin',this)">Admin</button>
   <button class="nav" onclick="show('student',this)">นักศึกษาเช็คชื่อ</button>
@@ -67,33 +80,57 @@ table{width:100%;border-collapse:collapse}th,td{text-align:left;padding:8px;bord
 </div>
 </section>
 
-<!-- SECTION: STUDENT CHECKIN (GPS ONLY) -->
+<!-- SECTION: STUDENT CHECKIN -->
 <section id="student" class="hidden">
 <div class="card">
-  <h2>ยืนยันตำแหน่งเพื่อเช็คชื่อ (GPS)</h2>
+  <h2>📍 เลือกรายชื่อและยืนยันตำแหน่งเพื่อเช็คชื่อ</h2>
   <div id="auth-form" style="margin-top:15px;">
     <div class="grid">
       <div>
-        <label>ห้องเรียน
-          <select id="sroom">
-            <option value="2101">ห้อง 2101</option>
-            <option value="2102">ห้อง 2102</option>
+        <label>ห้องเรียน (อาคารศูนย์เครื่องมือ 2)
+          <select id="sroom" onchange="updateStudentDropdown()">
+            <option value="2101">ห้อง 2101 (อาคาร F2)</option>
+            <option value="2102">ห้อง 2102 (อาคาร F2)</option>
           </select>
         </label>
-        <label>กลุ่ม<select id="sgroup"></select></label>
+        <label>กลุ่ม
+          <select id="sgroup" onchange="updateStudentDropdown()"></select>
+        </label>
       </div>
       <div>
-        <label>รหัสนักศึกษา<input id="sid" value="661001"></label>
-        <label>ชื่อ-สกุล<input id="sname" value="นักศึกษาตัวอย่าง"></label>
+        <label>เลือกชื่อนักศึกษา
+          <select id="studentSelect" onchange="onStudentSelectChange()"></select>
+        </label>
+        <label>ชื่อ-สกุล (แสดงอัตโนมัติ)
+          <input id="sname" readonly style="background:#f0f1f2; color:#555;">
+        </label>
       </div>
     </div>
-    <button class="primary" style="width:100%;margin-top:15px;padding:12px;font-size:16px;" onclick="checkinGPS()">
-      📍 ดึงตำแหน่ง GPS และเช็คชื่อ
+    <button class="primary" style="width:100%;margin-top:15px;padding:12px;font-size:16px;" onclick="openConfirmModal()">
+      📍 ตรวจสอบตำแหน่ง GPS และเช็คชื่อ
     </button>
   </div>
-  <div id="result" class="notice" style="margin-top:10px">กดปุ่มด้านบนเพื่อรับการตรวจสอบพิกัด GPS</div>
+  <div id="result" class="notice" style="margin-top:10px">เลือกห้อง/กลุ่ม/ชื่อของท่าน แล้วกดปุ่มเช็คชื่อ</div>
 </div>
 </section>
+
+<!-- MODAL CONFIRMATION -->
+<div id="confirmModal" class="modal-overlay hidden">
+  <div class="modal-content">
+    <h2>ยืนยันข้อมูลการเช็คชื่อ</h2>
+    <p class="muted">โปรดตรวจสอบข้อมูลของท่านก่อนยืนยันส่งพิกัด GPS</p>
+    <div class="confirm-box">
+      <div><b>ห้องเรียน:</b> <span id="cRoom">-</span> (อาคารศูนย์เครื่องมือ 2)</div>
+      <div><b>กลุ่ม:</b> <span id="cGroup">-</span></div>
+      <div><b>รหัสนักศึกษา:</b> <span id="cId">-</span></div>
+      <div><b>ชื่อ-สกุล:</b> <span id="cName">-</span></div>
+    </div>
+    <div class="actions" style="justify-content:flex-end; margin-top:15px;">
+      <button class="secondary" onclick="closeConfirmModal()">ยกเลิก</button>
+      <button class="primary" onclick="confirmAndCheckinGPS()">ยืนยันเช็คชื่อด้วย GPS</button>
+    </div>
+  </div>
+</div>
 
 <!-- SECTION: IMPORT -->
 <section id="import" class="hidden">
@@ -166,17 +203,18 @@ table{width:100%;border-collapse:collapse}th,td{text-align:left;padding:8px;bord
 </section>
 </main>
 
-<footer style="margin-top:28px;background:#34383d;color:#fff;padding:18px 22px;border-top:4px solid #f47b20;display:flex;justify-content:space-between;">
+<footer style="margin-top:28px;background:#34383d;color:#fff;padding:18px 22px;border-top:4px solid #f47b20;display:flex;justify-content:space-between;align-items:center;">
   <div><b style="color:#f47b20;font-size:20px">SUT</b> &nbsp; มหาวิทยาลัยเทคโนโลยีสุรนารี</div>
-  <div style="font-size:13px;color:#d9dcde">ระบบเช็คชื่อเข้าเรียนผ่าน GPS</div>
+  <div style="font-size:13px;color:#d9dcde">ระบบเช็คชื่อเข้าเรียนผ่าน GPS (อาคารศูนย์เครื่องมือ 2)</div>
 </footer>
 
 <script>
-// กำหนดพิกัดละติจูด/ลองจิจูดของแต่ละห้องเรียน (ตัวอย่างพิกัดอาคารเรียน มทส.)
-// สามารถเปลี่ยนเป็นค่าพิกัดจริงได้ที่นี่
+// ==========================================
+// 📍 พิกัด GPS อาคารศูนย์เครื่องมือ 2 (F2) มหาวิทยาลัยเทคโนโลยีสุรนารี
+// ==========================================
 const ROOM_LOCATIONS = {
-  2101: { lat: 14.8781, lng: 102.0192 },
-  2102: { lat: 14.8785, lng: 102.0195 }
+  2101: { lat: 14.877800, lng: 102.016300 }, // ห้อง 2101 อาคารศูนย์เครื่องมือ 2
+  2102: { lat: 14.877800, lng: 102.016300 }  // ห้อง 2102 อาคารศูนย์เครื่องมือ 2
 };
 
 const attendance = {2101:{},2102:{}}; 
@@ -196,6 +234,7 @@ function show(id,b){
   document.getElementById(id).classList.remove('hidden');
   document.querySelectorAll('.nav').forEach(x=>x.classList.remove('active'));
   b.classList.add('active');
+  if(id === 'student') updateStudentDropdown();
 }
 
 function getStudents(r, g){
@@ -250,9 +289,59 @@ function openClass(){
   msg.innerHTML = `<span class="status ok">เปิดรับเช็คชื่อแล้ว</span> ห้อง ${room.value} | ${start.value}–${end.value}`;
 }
 
-// ฟังก์ชันคำนวณระยะห่างระหว่าง 2 พิกัด (หน่วย: เมตร)
+function updateStudentDropdown(){
+  const r = document.getElementById('sroom').value;
+  const g = document.getElementById('sgroup').value || 1;
+  const select = document.getElementById('studentSelect');
+  const students = getStudents(r, g);
+  
+  select.innerHTML = '';
+  students.forEach(st => {
+    let opt = document.createElement('option');
+    opt.value = st.id;
+    opt.textContent = `${st.id} - ${st.name}`;
+    opt.dataset.name = st.name;
+    select.appendChild(opt);
+  });
+  
+  onStudentSelectChange();
+}
+
+function onStudentSelectChange(){
+  const select = document.getElementById('studentSelect');
+  const nameInput = document.getElementById('sname');
+  if(select.selectedOptions.length > 0){
+    nameInput.value = select.selectedOptions[0].dataset.name;
+  } else {
+    nameInput.value = '';
+  }
+}
+
+function openConfirmModal(){
+  if(!open){
+    result.innerHTML = '<span class="status error">ยังไม่เปิดคาบเรียนจากระบบ Admin</span>';
+    return;
+  }
+  const select = document.getElementById('studentSelect');
+  if(!select.value){
+    result.innerHTML = '<span class="status error">ไม่พบรายชื่อนักศึกษา</span>';
+    return;
+  }
+
+  document.getElementById('cRoom').textContent = document.getElementById('sroom').value;
+  document.getElementById('cGroup').textContent = document.getElementById('sgroup').value;
+  document.getElementById('cId').textContent = select.value;
+  document.getElementById('cName').textContent = document.getElementById('sname').value;
+  
+  document.getElementById('confirmModal').classList.remove('hidden');
+}
+
+function closeConfirmModal(){
+  document.getElementById('confirmModal').classList.add('hidden');
+}
+
 function calculateDistance(lat1, lon1, lat2, lon2) {
-  const R = 6371e3; // รัศมีโลกหน่วยเมตร
+  const R = 6371e3;
   const rad = Math.PI / 180;
   const dLat = (lat2 - lat1) * rad;
   const dLon = (lon2 - lon1) * rad;
@@ -263,25 +352,20 @@ function calculateDistance(lat1, lon1, lat2, lon2) {
   return R * c; 
 }
 
-// ระบบเช็คชื่อผ่าน GPS
-function checkinGPS(){
-  if(!open){
-    result.innerHTML = '<span class="status error">ยังไม่เปิดคาบเรียนจากระบบ Admin</span>';
-    return;
-  }
+function confirmAndCheckinGPS(){
+  closeConfirmModal();
   
-  let r = Number(sroom.value), g = Number(sgroup.value), id = sid.value.trim();
-  if(!id){
-    result.innerHTML = '<span class="status error">กรุณากรอกรหัสนักศึกษา</span>';
-    return;
-  }
+  let r = Number(document.getElementById('sroom').value);
+  let g = Number(document.getElementById('sgroup').value);
+  let id = document.getElementById('studentSelect').value;
+  let name = document.getElementById('sname').value;
 
   if (!navigator.geolocation) {
-    result.innerHTML = '<span class="status error">เบราว์เซอร์ของคุณไม่รองรับการดึงตำแหน่ง GPS</span>';
+    result.innerHTML = '<span class="status error">เบราว์เซอร์ไม่รองรับการดึงตำแหน่ง GPS</span>';
     return;
   }
 
-  result.innerHTML = '⏳ กำลังค้นหาตำแหน่งพิกัด GPS...';
+  result.innerHTML = '⏳ กำลังดึงตำแหน่งพิกัด GPS...';
 
   navigator.geolocation.getCurrentPosition(
     (position) => {
@@ -300,16 +384,16 @@ function checkinGPS(){
       if (distance <= maxRadius) {
         let timeStr = new Date().toLocaleTimeString('th-TH');
         attendance[r][g][id] = { time: timeStr, distance: Math.round(distance) };
-        result.innerHTML = `<span class="status ok">เช็คชื่อสำเร็จ!</span><br>ห้อง ${r} | กลุ่ม ${g} | รหัส ${id} | ระยะห่างจากห้อง ${Math.round(distance)} เมตร`;
+        result.innerHTML = `<span class="status ok">เช็คชื่อสำเร็จ!</span><br>ห้อง ${r} (ศูนย์เครื่องมือ 2) | กลุ่ม ${g} | รหัส ${id} (${name}) | ระยะห่างจากห้อง ${Math.round(distance)} เมตร`;
         
         room.value = r; group = g; render();
       } else {
-        result.innerHTML = `<span class="status error">เช็คชื่อไม่สำเร็จ! คุณไม่อยู่ในพื้นที่ห้องเรียน</span><br>ระยะปัจจุบัน: ${Math.round(distance)} เมตร (อนุญาตไม่เกิน ${maxRadius} เมตร)`;
+        result.innerHTML = `<span class="status error">เช็คชื่อไม่สำเร็จ! คุณไม่อยู่ในพื้นที่ศูนย์เครื่องมือ 2</span><br>ระยะปัจจุบัน: ${Math.round(distance)} เมตร (อนุญาตไม่เกิน ${maxRadius} เมตร)`;
       }
     },
     (err) => {
       let errText = "ไม่สามารถเข้าถึง GPS ได้";
-      if (err.code === 1) errText = "ผู้ใช้ปฏิเสธการเข้าถึงสิทธิ์ตำแหน่ง GPS (Permission Denied)";
+      if (err.code === 1) errText = "ผู้ใช้ปฏิเสธการเข้าถึงตำแหน่ง GPS (Permission Denied)";
       else if (err.code === 2) errText = "ไม่สามารถระบุตำแหน่งพิกัดได้ (Position Unavailable)";
       else if (err.code === 3) errText = "หมดเวลาเชื่อมต่อสัญญาณ GPS (Timeout)";
       result.innerHTML = `<span class="status error">${errText}</span>`;
@@ -385,6 +469,7 @@ function importCSV(){
     renderImported();
     renderScoreTable();
     render();
+    updateStudentDropdown();
     importMsg.innerHTML = `<span class="status good">นำเข้าสำเร็จ ${data.length} รายการ</span>`;
   };
   reader.readAsText(f, 'UTF-8');
@@ -538,11 +623,8 @@ window.onload = function(){
   initScoreGroups();
   render();
   renderScoreTable();
+  updateStudentDropdown();
 };
 </script>
 </body>
 </html>
-ข้อควรทราบเพิ่มเติมสำหรับการใช้งานระบบ GPS
-การใช้งานโปรโตคอล HTTPS: เบราว์เซอร์ยุคใหม่ (เช่น Chrome, Safari, iOS) จะไม่อนุญาตให้ใช้ Geolocation API บนเว็บที่ไม่ปลอดภัย ดังนั้นต้องโฮสต์ไฟล์ผ่าน HTTPS เท่านั้น (เช่น GitHub Pages หรือ Vercel ที่มี SSL)
-
-การระบุพิกัดห้องเรียน: สามารถนำพิกัดละติจูดและลองจิจูดจริงของห้อง 2101 และ 2102 ไปใส่ไว้ในอ็อบเจกต์ ROOM_LOCATIONS ที่ส่วน JavaScript เพื่อเพิ่มความแม่นยำในการวัดระยะทางได้เลยครับ
