@@ -9,7 +9,7 @@
     body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Tahoma,sans-serif;background:#e5e7e9;color:#20262b}
     header{background:linear-gradient(135deg,#ffffff 0%,#eceeef 62%,#d7dadd 100%);color:#34383d;min-height:92px;padding:14px 22px;border-bottom:4px solid #f47b20;display:flex;justify-content:space-between;align-items:center}
     .header-brand{display:flex;align-items:center;gap:12px}
-    .sut-logo-img{height:42px;width:auto;display:inline-block;vertical-align:middle}
+    .sut-logo-text{background:#f47b20;color:#fff;font-weight:900;font-size:22px;padding:6px 12px;border-radius:8px;letter-spacing:1px;display:inline-block}
     header h1{font-size:20px;margin:0;line-height:1.35;color:#34383d}
     .badge{background:#f47b20;color:#fff;padding:5px 9px;border-radius:999px;font-size:12px}
     nav{display:flex;gap:8px;padding:9px 14px;background:#34383d}
@@ -48,7 +48,7 @@
     .confirm-box{background:#f9fafb;border:1px solid #e5e7eb;padding:12px;border-radius:8px;margin:12px 0}
     .confirm-box div{margin-bottom:6px;font-size:14px}
     
-    /* Style เพิ่มเติมสำหรับปุ่มเลือกห้องในหน้า Admin */
+    /* Style สำหรับปุ่มเลือกห้องในหน้า Admin */
     .room-tabs { display: flex; gap: 10px; margin-bottom: 14px; }
     .room-tab { flex: 1; padding: 12px; text-align: center; background: #e0e0e0; border-radius: 8px; cursor: pointer; font-weight: bold; }
     .room-tab.active { background: #f47b20; color: #fff; }
@@ -57,7 +57,7 @@
 <body>
   <header>
     <div class="header-brand">
-      <img src="https://upload.wikimedia.org/wikipedia/commons/2/23/SUT_Logo_with_name.svg" alt="SUT Logo" class="sut-logo-img">
+      <span class="sut-logo-text">SUT</span>
       <h1>ระบบเช็คชื่อเข้าเรียน มหาวิทยาลัยเทคโนโลยีสุรนารี</h1>
     </div>
     <span class="badge">SUT GPS v2</span>
@@ -66,7 +66,6 @@
   <nav>
     <button class="nav active" onclick="show('admin',this)">Admin</button>
     <button class="nav" onclick="show('student',this)">นักศึกษาเช็คชื่อ</button>
-    <button class="nav" onclick="show('import',this)">นำเข้าข้อมูล</button>
     <button class="nav" onclick="show('scores',this)">คะแนนท้ายคาบ</button>
     <button class="nav" onclick="show('export',this)">ส่งออกข้อมูล</button>
   </nav>
@@ -92,22 +91,6 @@
         </div>
         
         <div class="grid">
-          <!-- ตั้งค่าคาบเรียน -->
-          <div class="card">
-            <h2>ตั้งค่าคาบเรียน</h2>
-            <label>ห้อง
-              <select id="room" onchange="switchAdminRoom(this.value)">
-                <option value="2101">2101</option>
-                <option value="2102">2102</option>
-              </select>
-            </label>
-            <label>รัศมี GPS ยอมรับ (เมตร)<input id="radius" type="number" value="30"></label>
-            <label>เวลาเริ่ม<input id="start" type="time" value="08:30"></label>
-            <label>เวลาสิ้นสุด<input id="end" type="time" value="10:30"></label>
-            <button class="primary" onclick="openClass()" style="margin-top:10px;width:100%">เปิดรับเช็คชื่อ</button>
-            <div id="msg" class="notice">ยังไม่ได้เปิดคาบเรียน</div>
-          </div>
-
           <!-- สรุปข้อมูลห้อง 2101 -->
           <div class="card">
             <h2>สรุปห้อง 2101</h2>
@@ -124,6 +107,83 @@
             <div class="row"><span>เข้าเรียน</span><b id="present2102">0</b></div>
             <div class="row"><span>ยังไม่เช็ก</span><b id="remain2102">0</b></div>
             <div class="row"><span>กลุ่ม</span><b>11</b></div>
+          </div>
+        </div>
+
+        <!-- ตั้งค่ากำหนดการเปิด-ปิด ล่วงหน้า (สูงสุด 15 คาบเรียน) -->
+        <div class="card" style="margin-top:14px">
+          <h2>📅 ตั้งเวลาเปิด-ปิด การลงทะเบียนล่วงหน้า (สูงสุด 15 ครั้ง)</h2>
+          <div class="grid">
+            <div>
+              <label>เลือกห้องเรียน
+                <select id="scheduleRoom">
+                  <option value="2101">ห้อง 2101</option>
+                  <option value="2102">ห้อง 2102</option>
+                </select>
+              </label>
+              <label>รัศมี GPS ยอมรับ (เมตร)<input id="radius" type="number" value="30"></label>
+              <label>วัน-เวลา เริ่มเปิดรับเช็คชื่อ
+                <input id="startDateTime" type="datetime-local">
+              </label>
+              <label>วัน-เวลา สิ้นสุดการเช็คชื่อ
+                <input id="endDateTime" type="datetime-local">
+              </label>
+              <button class="primary" onclick="addSchedule()" style="width:100%; margin-top:12px; padding:10px;">➕ เพิ่มลงตารางล่วงหน้า</button>
+            </div>
+
+            <div>
+              <p class="muted"><b>ตารางกำหนดการเปิดรับเช็คชื่อล่วงหน้า (<span id="scheduleCount">0</span>/15 ครั้ง)</b></p>
+              <div style="max-height:280px; overflow-y:auto;">
+                <table>
+                  <thead>
+                    <tr>
+                      <th>ห้อง</th>
+                      <th>วัน-เวลาเริ่ม</th>
+                      <th>วัน-เวลาสิ้นสุด</th>
+                      <th>สถานะ</th>
+                      <th>จัดการ</th>
+                    </tr>
+                  </thead>
+                  <tbody id="scheduleTableBody">
+                    <tr><td colspan="5" class="muted">ยังไม่มีการตั้งเวลาล่วงหน้า</td></tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ย้ายส่วนนำเข้าข้อมูลนักศึกษาเข้ามาไว้ใน Admin -->
+        <div class="card" style="margin-top:14px">
+          <h2>📥 นำเข้าข้อมูลนักศึกษา (เฉพาะ Admin)</h2>
+          <div class="grid">
+            <div>
+              <p class="muted">รองรับไฟล์ CSV รูปแบบ: ห้อง, กลุ่ม, รหัสนักศึกษา, ชื่อ-สกุล</p>
+              <input id="csvFile" type="file" accept=".csv,text/csv">
+              <div class="actions" style="margin-top:10px">
+                <button class="primary" onclick="importCSV()">นำเข้าข้อมูล</button>
+                <button class="success" onclick="downloadTemplate()">ดาวน์โหลดไฟล์ตัวอย่าง</button>
+              </div>
+              <div id="importMsg" class="notice">เลือกไฟล์ CSV แล้วกด “นำเข้าข้อมูล”</div>
+            </div>
+            <div>
+              <p class="muted"><b>ตัวอย่างรูปแบบไฟล์ CSV</b></p>
+              <table>
+                <thead><tr><th>ห้อง</th><th>กลุ่ม</th><th>รหัสนักศึกษา</th><th>ชื่อ-สกุล</th></tr></thead>
+                <tbody>
+                  <tr><td>2101</td><td>1</td><td>661001</td><td>นาย ก</td></tr>
+                  <tr><td>2102</td><td>1</td><td>661002</td><td>นาย ข</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+          
+          <div style="margin-top:14px">
+            <p class="muted"><b>ข้อมูลที่นำเข้าแล้ว (<span id="importCount">0</span> ราย)</b></p>
+            <table>
+              <thead><tr><th>ห้อง</th><th>กลุ่ม</th><th>รหัสนักศึกษา</th><th>ชื่อ-สกุล</th></tr></thead>
+              <tbody id="importedTable"><tr><td colspan="4" class="muted">ยังไม่มีข้อมูลที่นำเข้า</td></tr></tbody>
+            </table>
           </div>
         </div>
 
@@ -207,40 +267,6 @@
       </div>
     </section>
 
-    <!-- SECTION: IMPORT -->
-    <section id="import" class="hidden">
-      <div class="grid">
-        <div class="card">
-          <h2>📥 นำเข้าข้อมูลนักศึกษา</h2>
-          <p class="muted">รองรับไฟล์ CSV รูปแบบ: ห้อง, กลุ่ม, รหัสนักศึกษา, ชื่อ-สกุล</p>
-          <input id="csvFile" type="file" accept=".csv,text/csv">
-          <div class="actions" style="margin-top:10px">
-            <button class="primary" onclick="importCSV()">นำเข้าข้อมูล</button>
-            <button class="success" onclick="downloadTemplate()">ดาวน์โหลดไฟล์ตัวอย่าง</button>
-          </div>
-          <div id="importMsg" class="notice">เลือกไฟล์ CSV แล้วกด “นำเข้าข้อมูล”</div>
-        </div>
-        <div class="card">
-          <h2>ตัวอย่างรูปแบบไฟล์ CSV</h2>
-          <table>
-            <thead><tr><th>ห้อง</th><th>กลุ่ม</th><th>รหัสนักศึกษา</th><th>ชื่อ-สกุล</th></tr></thead>
-            <tbody>
-              <tr><td>2101</td><td>1</td><td>661001</td><td>นาย ก</td></tr>
-              <tr><td>2102</td><td>1</td><td>661002</td><td>นาย ข</td></tr>
-            </tbody>
-          </table>
-        </div>
-      </div>
-
-      <div class="card" style="margin-top:14px">
-        <h2>ข้อมูลที่นำเข้าแล้ว (<span id="importCount">0</span> ราย)</h2>
-        <table>
-          <thead><tr><th>ห้อง</th><th>กลุ่ม</th><th>รหัสนักศึกษา</th><th>ชื่อ-สกุล</th></tr></thead>
-          <tbody id="importedTable"><tr><td colspan="4" class="muted">ยังไม่มีข้อมูลที่นำเข้า</td></tr></tbody>
-        </table>
-      </div>
-    </section>
-
     <!-- SECTION: SCORES -->
     <section id="scores" class="hidden">
       <div class="card">
@@ -292,10 +318,7 @@
   </main>
 
   <footer style="margin-top:28px;background:#34383d;color:#fff;padding:18px 22px;border-top:4px solid #f47b20;display:flex;justify-content:space-between;align-items:center;">
-    <div style="display:flex;align-items:center;gap:10px;">
-      <img src="https://upload.wikimedia.org/wikipedia/commons/2/23/SUT_Logo_with_name.svg" alt="SUT Logo" style="height:32px;width:auto;"> 
-      &nbsp; มหาวิทยาลัยเทคโนโลยีสุรนารี
-    </div>
+    <div><b style="color:#f47b20;font-size:20px">SUT</b> &nbsp; มหาวิทยาลัยเทคโนโลยีสุรนารี</div>
     <div style="font-size:13px;color:#d9dcde">ระบบเช็คชื่อเข้าเรียนผ่าน GPS (อาคารศูนย์เครื่องมือ 2)</div>
   </footer>
 
@@ -309,13 +332,113 @@
     const attendance = {2101:{},2102:{}}; 
     const scoreData = {2101:{},2102:{}};
     let studentData = [];
-    let open = false, group = 1;
+    let group = 1;
+    
+    // อาร์เรย์สำหรับเก็บตารางเวลาล่วงหน้า (สูงสุด 15 รายการ)
+    let schedules = [];
 
     for(const r of [2101,2102]){
       for(let g=1;g<=11;g++){
         attendance[r][g] = {};
         scoreData[r][g] = {};
       }
+    }
+
+    // แปลงวัตถุ Date เป็นข้อความวันที่ พ.ศ. ไทย
+    function formatThaiDateTime(dateObj) {
+      if (!dateObj || isNaN(dateObj)) return '-';
+      return dateObj.toLocaleString('th-TH', {
+        timeZone: 'Asia/Bangkok',
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+      }) + ' น.';
+    }
+
+    function initDefaultDateTime() {
+      const now = new Date();
+      const end = new Date(now.getTime() + (2 * 60 * 60 * 1000));
+      
+      const formatForInput = (d) => {
+        const pad = (n) => String(n).padStart(2, '0');
+        return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+      };
+
+      document.getElementById('startDateTime').value = formatForInput(now);
+      document.getElementById('endDateTime').value = formatForInput(end);
+    }
+
+    // เพิ่มตารางเวลาล่วงหน้า
+    function addSchedule() {
+      if (schedules.length >= 15) {
+        alert("สามารถตั้งเวลาล่วงหน้าได้สูงสุด 15 ครั้งเท่านั้น");
+        return;
+      }
+
+      const room = document.getElementById('scheduleRoom').value;
+      const startVal = document.getElementById('startDateTime').value;
+      const endVal = document.getElementById('endDateTime').value;
+
+      if (!startVal || !endVal) {
+        alert("กรุณาเลือกวัน-เวลา เริ่มต้นและสิ้นสุดให้ครบถ้วน");
+        return;
+      }
+
+      const startMs = new Date(startVal).getTime();
+      const endMs = new Date(endVal).getTime();
+
+      if (endMs <= startMs) {
+        alert("วัน-เวลา สิ้นสุด ต้องมากกว่าวัน-เวลา เริ่มต้น");
+        return;
+      }
+
+      schedules.push({
+        id: Date.now(),
+        room: room,
+        startMs: startMs,
+        endMs: endMs
+      });
+
+      renderSchedules();
+    }
+
+    // ลบรายการสเกดดูล
+    function deleteSchedule(id) {
+      schedules = schedules.filter(s => s.id !== id);
+      renderSchedules();
+    }
+
+    // แสดงตารางสเกดดูล
+    function renderSchedules() {
+      const tbody = document.getElementById('scheduleTableBody');
+      document.getElementById('scheduleCount').textContent = schedules.length;
+
+      if (schedules.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="5" class="muted">ยังไม่มีการตั้งเวลาล่วงหน้า</td></tr>';
+        return;
+      }
+
+      const now = Date.now();
+      tbody.innerHTML = schedules.map(s => {
+        let statusBadge = '';
+        if (now < s.startMs) {
+          statusBadge = '<span class="status wait">ยังไม่ถึงเวลา</span>';
+        } else if (now >= s.startMs && now <= s.endMs) {
+          statusBadge = '<span class="status ok">กำลังเปิดรับ 🟢</span>';
+        } else {
+          statusBadge = '<span class="status error">หมดเวลาแล้ว 🔴</span>';
+        }
+
+        return `<tr>
+          <td><b>${s.room}</b></td>
+          <td>${formatThaiDateTime(new Date(s.startMs))}</td>
+          <td>${formatThaiDateTime(new Date(s.endMs))}</td>
+          <td>${statusBadge}</td>
+          <td><button class="danger" style="padding:4px 8px; font-size:12px;" onclick="deleteSchedule(${s.id})">ลบ</button></td>
+        </tr>`;
+      }).join('');
     }
 
     function verifyAdminPasscode(){
@@ -328,6 +451,7 @@
         document.getElementById('admin-content').classList.remove('hidden');
         msg.classList.add('hidden');
         render();
+        renderSchedules();
       } else {
         msg.classList.remove('hidden');
         msg.innerHTML = '<span class="status error">รหัสผ่านไม่ถูกต้อง กรุณาลองใหม่อีกครั้ง</span>';
@@ -375,21 +499,18 @@
       return { total: totalCount, present: pTotal, remain: totalCount - pTotal };
     }
 
-    /* ฟังก์ชันสลับห้องเรียนในหน้า Admin */
     function switchAdminRoom(rVal){
-      document.getElementById('room').value = rVal;
       document.getElementById('tab2101').classList.toggle('active', rVal === '2101');
       document.getElementById('tab2102').classList.toggle('active', rVal === '2102');
       render();
     }
 
     function render(){
-      let selectedRoom = Number(document.getElementById('room').value);
+      let selectedRoom = document.getElementById('tab2101').classList.contains('active') ? 2101 : 2102;
       document.getElementById('rtitle').textContent = selectedRoom;
       document.getElementById('rgtitle').textContent = selectedRoom;
       document.getElementById('rstitle').textContent = selectedRoom;
 
-      // 1. อัปเดตการ์ดสรุปยอดของห้อง 2101 และ 2102
       const s2101 = getRoomSummary(2101);
       document.getElementById('totalCount2101').textContent = s2101.total;
       document.getElementById('present2101').textContent = s2101.present;
@@ -400,13 +521,11 @@
       document.getElementById('present2102').textContent = s2102.present;
       document.getElementById('remain2102').textContent = s2102.remain;
 
-      // 2. แสดงปุ่มเลือกกลุ่มตามห้องที่กำลังเลือก (2101 หรือ 2102)
       let h = '';
       for(let g=1;g<=11;g++) h += `<button class="pill ${g===group?'sel':''}" onclick="group=${g};render()">กลุ่ม ${g}</button>`;
       document.getElementById('groups').innerHTML = h;
       document.getElementById('gtitle').textContent = group;
       
-      // 3. แสดงสมาชิกกลุ่มของห้องที่กำลังเลือก
       let currentGroupStudents = getStudents(selectedRoom, group);
       let m = '';
       currentGroupStudents.forEach((st) => {
@@ -418,7 +537,6 @@
       });
       document.getElementById('members').innerHTML = m;
       
-      // 4. แสดงสรุป 11 กลุ่มของห้องที่กำลังเลือก (ห้อง 2101 หรือ 2102)
       let s = '';
       for(let g=1;g<=11;g++){
         let gStudents = getStudents(selectedRoom, g);
@@ -429,11 +547,6 @@
         s += `<tr><td>กลุ่ม ${g}</td><td>${pCount}</td><td>${gStudents.length - pCount}</td></tr>`;
       }
       document.getElementById('summary').innerHTML = s;
-    }
-
-    function openClass(){
-      open = true;
-      document.getElementById('msg').innerHTML = `<span class="status ok">เปิดรับเช็คชื่อแล้ว</span> ห้อง ${document.getElementById('room').value} | ${document.getElementById('start').value}–${document.getElementById('end').value}`;
     }
 
     function updateStudentDropdown(){
@@ -470,17 +583,33 @@
         return;
       }
 
-      if(!open){
-        document.getElementById('result').innerHTML = '<span class="status error">ยังไม่เปิดคาบเรียนจากระบบ Admin</span>';
+      const selectedRoom = document.getElementById('sroom').value;
+      const nowTime = Date.now();
+
+      // ตรวจสอบว่าห้องเรียนนี้มีช่วงเวลาที่เปิดรับเช็คชื่ออยู่หรือไม่
+      const activeSchedule = schedules.find(s => s.room === selectedRoom && nowTime >= s.startMs && nowTime <= s.endMs);
+
+      if (!activeSchedule) {
+        // หากไม่มีตารางเปิดรับอยู่ในปัจจุบัน ให้ตรวจสอบหาสเกดดูลอันถัดไปของห้องนี้
+        const upcomingSchedule = schedules.filter(s => s.room === selectedRoom && nowTime < s.startMs)
+                                          .sort((a,b) => a.startMs - b.startMs)[0];
+        
+        if (upcomingSchedule) {
+          const startTxt = formatThaiDateTime(new Date(upcomingSchedule.startMs));
+          document.getElementById('result').innerHTML = `<span class="status error">ยังไม่ถึงเวลาเปิดรับเช็คชื่อสำหรับห้อง ${selectedRoom}</span><br>จะเปิดรับในวันที่: ${startTxt}`;
+        } else {
+          document.getElementById('result').innerHTML = `<span class="status error">ขณะนี้ระบบปิดรับเช็คชื่อสำหรับห้อง ${selectedRoom}</span>`;
+        }
         return;
       }
+
       const select = document.getElementById('studentSelect');
       if(!select.value){
         document.getElementById('result').innerHTML = '<span class="status error">ไม่พบรายชื่อนักศึกษา</span>';
         return;
       }
 
-      document.getElementById('cRoom').textContent = document.getElementById('sroom').value;
+      document.getElementById('cRoom').textContent = selectedRoom;
       document.getElementById('cGroup').textContent = document.getElementById('sgroup').value;
       document.getElementById('cId').textContent = select.value;
       document.getElementById('cName').textContent = document.getElementById('sname').value;
@@ -538,9 +667,10 @@
           const distance = calculateDistance(userLat, userLng, targetLoc.lat, targetLoc.lng);
 
           if (distance <= maxRadius) {
-            let timeStr = new Date().toLocaleTimeString('th-TH');
+            let nowObj = new Date();
+            let timeStr = formatThaiDateTime(nowObj);
             attendance[r][g][id] = { time: timeStr, distance: Math.round(distance) };
-            result.innerHTML = `<span class="status ok">เช็คชื่อสำเร็จ!</span><br>ห้อง ${r} (ศูนย์เครื่องมือ 2) | กลุ่ม ${g} | รหัส ${id} (${name}) | ระยะห่างจากห้อง ${Math.round(distance)} เมตร`;
+            result.innerHTML = `<span class="status ok">เช็คชื่อสำเร็จ!</span><br>ห้อง ${r} (ศูนย์เครื่องมือ 2) | กลุ่ม ${g} | รหัส ${id} (${name})<br><b>เวลาบันทึก:</b> ${timeStr} | ระยะห่าง ${Math.round(distance)} เมตร`;
             
             if(isAdminLoggedIn) render();
           } else {
@@ -777,9 +907,15 @@
     }
 
     window.onload = function(){
+      initDefaultDateTime();
       initScoreGroups();
       renderScoreTable();
       updateStudentDropdown();
+      
+      // อัปเดตการแสดงผลตารางสเกดดูลทุกๆ 10 วินาที
+      setInterval(() => {
+        if (isAdminLoggedIn) renderSchedules();
+      }, 10000);
     };
   </script>
 </body>
