@@ -112,9 +112,8 @@ table{width:100%;border-collapse:collapse}th,td{text-align:left;padding:8px;bord
   </div>
   <div id="result" class="notice" style="margin-top:10px">เลือกห้อง/กลุ่ม/ชื่อของท่าน แล้วกดปุ่มเช็คชื่อ</div>
 </div>
-</section>
 
-<!-- MODAL CONFIRMATION -->
+<!-- MODAL CONFIRMATION (เฉพาะหน้านักศึกษาเท่านั้น) -->
 <div id="confirmModal" class="modal-overlay hidden">
   <div class="modal-content">
     <h2>ยืนยันข้อมูลการเช็คชื่อ</h2>
@@ -131,6 +130,7 @@ table{width:100%;border-collapse:collapse}th,td{text-align:left;padding:8px;bord
     </div>
   </div>
 </div>
+</section>
 
 <!-- SECTION: IMPORT -->
 <section id="import" class="hidden">
@@ -209,12 +209,10 @@ table{width:100%;border-collapse:collapse}th,td{text-align:left;padding:8px;bord
 </footer>
 
 <script>
-// ==========================================
 // 📍 พิกัด GPS อาคารศูนย์เครื่องมือ 2 (F2) มหาวิทยาลัยเทคโนโลยีสุรนารี
-// ==========================================
 const ROOM_LOCATIONS = {
-  2101: { lat: 14.877800, lng: 102.016300 }, // ห้อง 2101 อาคารศูนย์เครื่องมือ 2
-  2102: { lat: 14.877800, lng: 102.016300 }  // ห้อง 2102 อาคารศูนย์เครื่องมือ 2
+  2101: { lat: 14.877800, lng: 102.016300 },
+  2102: { lat: 14.877800, lng: 102.016300 }
 };
 
 const attendance = {2101:{},2102:{}}; 
@@ -317,7 +315,13 @@ function onStudentSelectChange(){
   }
 }
 
+// ฟังก์ชันเปิด Modal ยืนยัน ทำงานเฉพาะเมื่ออยู่ในหน้า "นักศึกษา" เท่านั้น
 function openConfirmModal(){
+  const studentSection = document.getElementById('student');
+  if(studentSection.classList.contains('hidden')){
+    return; // ป้องกันการเรียกใช้เมื่ออยู่หน้าอื่น
+  }
+
   if(!open){
     result.innerHTML = '<span class="status error">ยังไม่เปิดคาบเรียนจากระบบ Admin</span>';
     return;
