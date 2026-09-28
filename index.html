@@ -8,8 +8,8 @@
 <style>
 *{box-sizing:border-box}body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Tahoma,sans-serif;background:#e5e7e9;color:#20262b}
 header{background:linear-gradient(135deg,#ffffff 0%,#eceeef 62%,#d7dadd 100%);color:#34383d;min-height:92px;padding:14px 22px;border-bottom:4px solid #f47b20;display:flex;justify-content:space-between;align-items:center}
-.header-brand{display:flex;align-items:center;gap:14px}
-.header-logo{height:55px;width:auto;object-fit:contain}
+.header-brand{display:flex;align-items:center;gap:12px}
+.sut-logo-text{background:#f47b20;color:#fff;font-weight:900;font-size:22px;padding:6px 12px;border-radius:8px;letter-spacing:1px;display:inline-block}
 header h1{font-size:20px;margin:0;line-height:1.35;color:#34383d}
 .badge{background:#f47b20;color:#fff;padding:5px 9px;border-radius:999px;font-size:12px}
 nav{display:flex;gap:8px;padding:9px 14px;background:#34383d}
@@ -19,7 +19,7 @@ main{max-width:1150px;margin:18px auto;padding:0 14px}.grid{display:grid;grid-te
 h2{font-size:18px;margin:0 0 12px;border-left:5px solid #f47b20;padding-left:10px}.muted{color:#667085;font-size:13px}.row{display:flex;justify-content:space-between;align-items:center;padding:9px 0;border-bottom:1px solid #eee}
 select,input{width:100%;padding:9px;border:1px solid #cbd5df;border-radius:8px;margin-top:5px}label{display:block;margin:8px 0;font-size:14px}
 .primary{background:#f47b20;color:#fff}.success{background:#2f9e5b;color:#fff}.danger{background:#c62828;color:#fff}.secondary{background:#6c757d;color:#fff}
-.hidden{display:none}.notice{padding:10px;border-radius:8px;background:#f0f1f2;margin-top:10px;font-size:13px}
+.hidden{display:none !important}.notice{padding:10px;border-radius:8px;background:#f0f1f2;margin-top:10px;font-size:13px}
 .pills{display:flex;flex-wrap:wrap;gap:7px;margin:10px 0}.pill{background:#eceeef;border:0;border-radius:9px;padding:9px 13px;cursor:pointer}.pill.sel{background:#f47b20;color:#fff}
 .status{padding:5px 8px;border-radius:7px;font-size:12px;font-weight:700}.ok{background:#e7f6ec;color:#24733e}.wait{background:#fff4d6;color:#815b08}.error{background:#fde8e8;color:#9b1c1c}
 table{width:100%;border-collapse:collapse}th,td{text-align:left;padding:8px;border-bottom:1px solid #eee;font-size:13px}th{background:#f0f1f2}
@@ -27,8 +27,8 @@ table{width:100%;border-collapse:collapse}th,td{text-align:left;padding:8px;bord
 .actions{display:flex;flex-wrap:wrap;gap:8px}
 
 /* Modal Confirmation Box Style */
-.modal-overlay{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.5);display:flex;justify-content:center;align-items:center;z-index:999}
-.modal-content{background:#fff;padding:24px;border-radius:14px;max-width:450px;width:90%;box-shadow:0 4px 20px rgba(0,0,0,0.2)}
+.modal-overlay{position:fixed;top:0;left:0;width:100vw;height:100vh;background:rgba(0,0,0,0.5);display:flex;justify-content:center;align-items:center;z-index:99999}
+.modal-content{background:#fff;padding:24px;border-radius:14px;max-width:450px;width:90%;box-shadow:0 4px 20px rgba(0,0,0,0.2);position:relative;z-index:100000}
 .confirm-box{background:#f9fafb;border:1px solid #e5e7eb;padding:12px;border-radius:8px;margin:12px 0}
 .confirm-box div{margin-bottom:6px;font-size:14px}
 </style>
@@ -36,7 +36,8 @@ table{width:100%;border-collapse:collapse}th,td{text-align:left;padding:8px;bord
 <body>
 <header>
   <div class="header-brand">
-    <img src="https://upload.wikimedia.org/wikipedia/th/c/c2/SUT_logo.png" alt="SUT Logo" class="header-logo">
+    <!-- ตัวอักษร SUT แบบบล็อกข้อความ -->
+    <span class="sut-logo-text">SUT</span>
     <h1>ระบบเช็คชื่อเข้าเรียน มหาวิทยาลัยเทคโนโลยีสุรนารี</h1>
   </div>
   <span class="badge">SUT GPS v2</span>
@@ -113,7 +114,7 @@ table{width:100%;border-collapse:collapse}th,td{text-align:left;padding:8px;bord
   <div id="result" class="notice" style="margin-top:10px">เลือกห้อง/กลุ่ม/ชื่อของท่าน แล้วกดปุ่มเช็คชื่อ</div>
 </div>
 
-<!-- MODAL CONFIRMATION (เฉพาะหน้านักศึกษาเท่านั้น) -->
+<!-- MODAL CONFIRMATION (อยู่ในหน้านักศึกษา) -->
 <div id="confirmModal" class="modal-overlay hidden">
   <div class="modal-content">
     <h2>ยืนยันข้อมูลการเช็คชื่อ</h2>
@@ -125,8 +126,8 @@ table{width:100%;border-collapse:collapse}th,td{text-align:left;padding:8px;bord
       <div><b>ชื่อ-สกุล:</b> <span id="cName">-</span></div>
     </div>
     <div class="actions" style="justify-content:flex-end; margin-top:15px;">
-      <button class="secondary" onclick="closeConfirmModal()">ยกเลิก</button>
-      <button class="primary" onclick="confirmAndCheckinGPS()">ยืนยันเช็คชื่อด้วย GPS</button>
+      <button type="button" class="secondary" onclick="closeConfirmModal()">ยกเลิก</button>
+      <button type="button" class="primary" onclick="confirmAndCheckinGPS()">ยืนยันเช็คชื่อด้วย GPS</button>
     </div>
   </div>
 </div>
@@ -315,11 +316,11 @@ function onStudentSelectChange(){
   }
 }
 
-// ฟังก์ชันเปิด Modal ยืนยัน ทำงานเฉพาะเมื่ออยู่ในหน้า "นักศึกษา" เท่านั้น
+// เปิดป๊อปอัปยืนยัน
 function openConfirmModal(){
   const studentSection = document.getElementById('student');
   if(studentSection.classList.contains('hidden')){
-    return; // ป้องกันการเรียกใช้เมื่ออยู่หน้าอื่น
+    return;
   }
 
   if(!open){
@@ -340,8 +341,12 @@ function openConfirmModal(){
   document.getElementById('confirmModal').classList.remove('hidden');
 }
 
+// ปิดป๊อปอัปยืนยัน
 function closeConfirmModal(){
-  document.getElementById('confirmModal').classList.add('hidden');
+  const modal = document.getElementById('confirmModal');
+  if(modal){
+    modal.classList.add('hidden');
+  }
 }
 
 function calculateDistance(lat1, lon1, lat2, lon2) {
