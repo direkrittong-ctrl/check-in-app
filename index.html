@@ -71,29 +71,43 @@ table{width:100%;border-collapse:collapse}th,td{text-align:left;padding:8px;bord
     </div>
     
     <div class="grid">
-    <div class="card">
-      <h2>ตั้งค่าคาบเรียน</h2>
-      <label>ห้อง<select id="room" onchange="render()"><option value="2101">2101</option><option value="2102">2102</option></select></label>
-      <label>รัศมี GPS ยอมรับ (เมตร)<input id="radius" type="number" value="30"></label>
-      <label>เวลาเริ่ม<input id="start" type="time" value="08:30"></label>
-      <label>เวลาสิ้นสุด<input id="end" type="time" value="10:30"></label>
-      <button class="primary" onclick="openClass()" style="margin-top:10px;width:100%">เปิดรับเช็คชื่อ</button>
-      <div id="msg" class="notice">ยังไม่ได้เปิดคาบเรียน</div>
+      <!-- ตั้งค่าคาบเรียน -->
+      <div class="card">
+        <h2>ตั้งค่าคาบเรียน</h2>
+        <label>ห้อง<select id="room" onchange="render()"><option value="2101">2101</option><option value="2102">2102</option></select></label>
+        <label>รัศมี GPS ยอมรับ (เมตร)<input id="radius" type="number" value="30"></label>
+        <label>เวลาเริ่ม<input id="start" type="time" value="08:30"></label>
+        <label>เวลาสิ้นสุด<input id="end" type="time" value="10:30"></label>
+        <button class="primary" onclick="openClass()" style="margin-top:10px;width:100%">เปิดรับเช็คชื่อ</button>
+        <div id="msg" class="notice">ยังไม่ได้เปิดคาบเรียน</div>
+      </div>
+
+      <!-- สรุปข้อมูลห้อง 2101 -->
+      <div class="card">
+        <h2>สรุปห้อง 2101</h2>
+        <div class="row"><span>นักศึกษาทั้งหมด</span><b id="totalCount2101">0</b></div>
+        <div class="row"><span>เข้าเรียน</span><b id="present2101">0</b></div>
+        <div class="row"><span>ยังไม่เช็ก</span><b id="remain2101">0</b></div>
+        <div class="row"><span>กลุ่ม</span><b>11</b></div>
+      </div>
+
+      <!-- สรุปข้อมูลห้อง 2102 -->
+      <div class="card">
+        <h2>สรุปห้อง 2102</h2>
+        <div class="row"><span>นักศึกษาทั้งหมด</span><b id="totalCount2102">0</b></div>
+        <div class="row"><span>เข้าเรียน</span><b id="present2102">0</b></div>
+        <div class="row"><span>ยังไม่เช็ก</span><b id="remain2102">0</b></div>
+        <div class="row"><span>กลุ่ม</span><b>11</b></div>
+      </div>
     </div>
-    <div class="card">
-      <h2>สรุปห้อง <span id="rtitle">2101</span></h2>
-      <div class="row"><span>นักศึกษาทั้งหมด</span><b id="totalStudentCount">0</b></div>
-      <div class="row"><span>เข้าเรียน</span><b id="present">0</b></div>
-      <div class="row"><span>ยังไม่เช็ก</span><b id="remain">0</b></div>
-      <div class="row"><span>กลุ่ม</span><b>11</b></div>
-    </div>
-    </div>
+
     <div class="card" style="margin-top:14px">
-      <h2>เลือกกลุ่ม</h2><div id="groups" class="pills"></div>
+      <h2>เลือกกลุ่ม (ห้อง <span id="rtitle">2101</span>)</h2>
+      <div id="groups" class="pills"></div>
     </div>
     <div class="grid" style="margin-top:14px">
-      <div class="card"><h2>สมาชิกกลุ่ม <span id="gtitle">1</span></h2><div id="members"></div></div>
-      <div class="card"><h2>สรุป 11 กลุ่ม</h2><table><thead><tr><th>กลุ่ม</th><th>มา</th><th>รอ</th></tr></thead><tbody id="summary"></tbody></table></div>
+      <div class="card"><h2>สมาชิกกลุ่ม <span id="gtitle">1</span> (ห้อง <span id="rgtitle">2101</span>)</h2><div id="members"></div></div>
+      <div class="card"><h2>สรุป 11 กลุ่ม (ห้อง <span id="rstitle">2101</span>)</h2><table><thead><tr><th>กลุ่ม</th><th>มา</th><th>รอ</th></tr></thead><tbody id="summary"></tbody></table></div>
     </div>
   </div>
 </section>
@@ -292,20 +306,47 @@ function getStudents(r, g){
   }));
 }
 
-// ฟังก์ชัน Render ข้อมูลใน Admin (ดึงตามห้องที่เลือก ได้แก่ 2101 หรือ 2102)
+// คำนวณยอดสรุปแต่ละห้อง
+function getRoomSummary(r){
+  let pTotal = 0, totalCount = 0;
+  for(let g=1; g<=11; g++){
+    let gStudents = getStudents(r, g);
+    totalCount += gStudents.length;
+    gStudents.forEach(st => {
+      if(attendance[r] && attendance[r][g] && attendance[r][g][st.id]) pTotal++;
+    });
+  }
+  return { total: totalCount, present: pTotal, remain: totalCount - pTotal };
+}
+
+// Render การแสดงผลในแผง Admin รวม 2101 และ 2102
 function render(){
-  let r = Number(document.getElementById('room').value);
-  document.getElementById('rtitle').textContent = r;
-  
+  let selectedRoom = Number(document.getElementById('room').value);
+  document.getElementById('rtitle').textContent = selectedRoom;
+  document.getElementById('rgtitle').textContent = selectedRoom;
+  document.getElementById('rstitle').textContent = selectedRoom;
+
+  // 1. ดึงข้อมูลสรุปของห้อง 2101 และ 2102 แสดงผลในการ์ดแยก
+  const s2101 = getRoomSummary(2101);
+  document.getElementById('totalCount2101').textContent = s2101.total;
+  document.getElementById('present2101').textContent = s2101.present;
+  document.getElementById('remain2101').textContent = s2101.remain;
+
+  const s2102 = getRoomSummary(2102);
+  document.getElementById('totalCount2102').textContent = s2102.total;
+  document.getElementById('present2102').textContent = s2102.present;
+  document.getElementById('remain2102').textContent = s2102.remain;
+
+  // 2. แสดงปุ่มกลุ่มและสมาชิกกลุ่มตามห้องที่เลือกอยู่ใน Dropdown
   let h = '';
   for(let g=1;g<=11;g++) h += `<button class="pill ${g===group?'sel':''}" onclick="group=${g};render()">กลุ่ม ${g}</button>`;
   document.getElementById('groups').innerHTML = h;
   document.getElementById('gtitle').textContent = group;
   
-  let currentGroupStudents = getStudents(r, group);
+  let currentGroupStudents = getStudents(selectedRoom, group);
   let m = '';
   currentGroupStudents.forEach((st) => {
-    let isPresent = attendance[r] && attendance[r][group] && attendance[r][group][st.id] ? true : false;
+    let isPresent = attendance[selectedRoom] && attendance[selectedRoom][group] && attendance[selectedRoom][group][st.id] ? true : false;
     m += `<div class="member">
             <span><b>${st.id}</b> - ${st.name}<br><span class="muted">กลุ่ม ${group}</span></span>
             <span class="status ${isPresent?'ok':'wait'}">${isPresent?'เข้าเรียน':'รอ'}</span>
@@ -313,21 +354,17 @@ function render(){
   });
   document.getElementById('members').innerHTML = m;
   
-  let s = '', pTotal = 0, totalCount = 0;
+  // 3. แสดงตารางสรุป 11 กลุ่มของห้องที่เลือก
+  let s = '';
   for(let g=1;g<=11;g++){
-    let gStudents = getStudents(r, g);
-    totalCount += gStudents.length;
+    let gStudents = getStudents(selectedRoom, g);
     let pCount = 0;
     gStudents.forEach(st => { 
-      if(attendance[r] && attendance[r][g] && attendance[r][g][st.id]) pCount++; 
+      if(attendance[selectedRoom] && attendance[selectedRoom][g] && attendance[selectedRoom][g][st.id]) pCount++; 
     });
-    pTotal += pCount;
     s += `<tr><td>กลุ่ม ${g}</td><td>${pCount}</td><td>${gStudents.length - pCount}</td></tr>`;
   }
   document.getElementById('summary').innerHTML = s;
-  document.getElementById('present').textContent = pTotal;
-  document.getElementById('remain').textContent = totalCount - pTotal;
-  document.getElementById('totalStudentCount').textContent = totalCount;
 }
 
 function openClass(){
@@ -524,7 +561,7 @@ function importCSV(){
     studentData = data;
     renderImported();
     renderScoreTable();
-    render();
+    if(isAdminLoggedIn) render();
     updateStudentDropdown();
     importMsg.innerHTML = `<span class="status good">นำเข้าสำเร็จ ${data.length} รายการ</span>`;
   };
