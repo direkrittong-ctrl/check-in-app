@@ -36,7 +36,6 @@ table{width:100%;border-collapse:collapse}th,td{text-align:left;padding:8px;bord
 <body>
 <header>
   <div class="header-brand">
-    <!-- ตัวอักษร SUT แบบบล็อกข้อความ -->
     <span class="sut-logo-text">SUT</span>
     <h1>ระบบเช็คชื่อเข้าเรียน มหาวิทยาลัยเทคโนโลยีสุรนารี</h1>
   </div>
@@ -52,33 +51,51 @@ table{width:100%;border-collapse:collapse}th,td{text-align:left;padding:8px;bord
 </nav>
 
 <main>
-<!-- SECTION: ADMIN -->
+<!-- SECTION: ADMIN LOGIN / DASHBOARD -->
 <section id="admin">
-<div class="grid">
-<div class="card">
-  <h2>ตั้งค่าคาบเรียน</h2>
-  <label>ห้อง<select id="room" onchange="render()"><option>2101</option><option>2102</option></select></label>
-  <label>รัศมี GPS ยอมรับ (เมตร)<input id="radius" type="number" value="30"></label>
-  <label>เวลาเริ่ม<input id="start" type="time" value="08:30"></label>
-  <label>เวลาสิ้นสุด<input id="end" type="time" value="10:30"></label>
-  <button class="primary" onclick="openClass()" style="margin-top:10px;width:100%">เปิดรับเช็คชื่อ</button>
-  <div id="msg" class="notice">ยังไม่ได้เปิดคาบเรียน</div>
-</div>
-<div class="card">
-  <h2>สรุปห้อง <span id="rtitle">2101</span></h2>
-  <div class="row"><span>นักศึกษาทั้งหมด</span><b id="totalStudentCount">33</b></div>
-  <div class="row"><span>เข้าเรียน</span><b id="present">0</b></div>
-  <div class="row"><span>ยังไม่เช็ก</span><b id="remain">33</b></div>
-  <div class="row"><span>กลุ่ม</span><b>11</b></div>
-</div>
-</div>
-<div class="card" style="margin-top:14px">
-  <h2>เลือกกลุ่ม</h2><div id="groups" class="pills"></div>
-</div>
-<div class="grid" style="margin-top:14px">
-  <div class="card"><h2>สมาชิกกลุ่ม <span id="gtitle">1</span></h2><div id="members"></div></div>
-  <div class="card"><h2>สรุป 11 กลุ่ม</h2><table><thead><tr><th>กลุ่ม</th><th>มา</th><th>รอ</th></tr></thead><tbody id="summary"></tbody></table></div>
-</div>
+  <!-- ส่วนฟอร์มเข้าสู่ระบบ Admin -->
+  <div id="admin-login-card" class="card" style="max-width:400px; margin:40px auto;">
+    <h2>🔐 เข้าสู่ระบบผู้ดูแลระบบ (Admin)</h2>
+    <label>รหัสผ่านเข้าใช้งาน
+      <input id="adminPasscode" type="password" placeholder="กรอกรหัสผ่าน Admin">
+    </label>
+    <button class="primary" style="width:100%; margin-top:12px; padding:10px;" onclick="verifyAdminPasscode()">เข้าสู่ระบบ</button>
+    <div id="adminLoginMsg" class="notice hidden" style="margin-top:10px;"></div>
+  </div>
+
+  <!-- ส่วนแผงควบคุม Admin (ซ่อนไว้จนกว่าจะเข้าสู่ระบบสำเร็จ) -->
+  <div id="admin-content" class="hidden">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px;">
+      <span class="status ok">เข้าสู่ระบบสิทธิ์ Admin แล้ว</span>
+      <button class="danger" onclick="adminLogout()">ออกจากระบบ Admin</button>
+    </div>
+    
+    <div class="grid">
+    <div class="card">
+      <h2>ตั้งค่าคาบเรียน</h2>
+      <label>ห้อง<select id="room" onchange="render()"><option>2101</option><option>2102</option></select></label>
+      <label>รัศมี GPS ยอมรับ (เมตร)<input id="radius" type="number" value="30"></label>
+      <label>เวลาเริ่ม<input id="start" type="time" value="08:30"></label>
+      <label>เวลาสิ้นสุด<input id="end" type="time" value="10:30"></label>
+      <button class="primary" onclick="openClass()" style="margin-top:10px;width:100%">เปิดรับเช็คชื่อ</button>
+      <div id="msg" class="notice">ยังไม่ได้เปิดคาบเรียน</div>
+    </div>
+    <div class="card">
+      <h2>สรุปห้อง <span id="rtitle">2101</span></h2>
+      <div class="row"><span>นักศึกษาทั้งหมด</span><b id="totalStudentCount">33</b></div>
+      <div class="row"><span>เข้าเรียน</span><b id="present">0</b></div>
+      <div class="row"><span>ยังไม่เช็ก</span><b id="remain">33</b></div>
+      <div class="row"><span>กลุ่ม</span><b>11</b></div>
+    </div>
+    </div>
+    <div class="card" style="margin-top:14px">
+      <h2>เลือกกลุ่ม</h2><div id="groups" class="pills"></div>
+    </div>
+    <div class="grid" style="margin-top:14px">
+      <div class="card"><h2>สมาชิกกลุ่ม <span id="gtitle">1</span></h2><div id="members"></div></div>
+      <div class="card"><h2>สรุป 11 กลุ่ม</h2><table><thead><tr><th>กลุ่ม</th><th>มา</th><th>รอ</th></tr></thead><tbody id="summary"></tbody></table></div>
+    </div>
+  </div>
 </section>
 
 <!-- SECTION: STUDENT CHECKIN -->
@@ -210,6 +227,10 @@ table{width:100%;border-collapse:collapse}th,td{text-align:left;padding:8px;bord
 </footer>
 
 <script>
+// รหัสผ่านเข้าใช้งานสิทธิ์ Admin
+const ADMIN_PASSCODE = "269002";
+let isAdminLoggedIn = false;
+
 // 📍 พิกัด GPS อาคารศูนย์เครื่องมือ 2 (F2) มหาวิทยาลัยเทคโนโลยีสุรนารี
 const ROOM_LOCATIONS = {
   2101: { lat: 14.877800, lng: 102.016300 },
@@ -226,6 +247,31 @@ for(const r of [2101,2102]){
     attendance[r][g] = {};
     scoreData[r][g] = {};
   }
+}
+
+// ตรวจสอบรหัสผ่าน Admin
+function verifyAdminPasscode(){
+  const pwd = document.getElementById('adminPasscode').value;
+  const msg = document.getElementById('adminLoginMsg');
+  
+  if(pwd === ADMIN_PASSCODE){
+    isAdminLoggedIn = true;
+    document.getElementById('admin-login-card').classList.add('hidden');
+    document.getElementById('admin-content').classList.remove('hidden');
+    msg.classList.add('hidden');
+    render();
+  } else {
+    msg.classList.remove('hidden');
+    msg.innerHTML = '<span class="status error">รหัสผ่านไม่ถูกต้อง กรุณาลองใหม่อีกครั้ง</span>';
+  }
+}
+
+// ออกจากระบบ Admin
+function adminLogout(){
+  isAdminLoggedIn = false;
+  document.getElementById('adminPasscode').value = '';
+  document.getElementById('admin-content').classList.add('hidden');
+  document.getElementById('admin-login-card').classList.remove('hidden');
 }
 
 function show(id,b){
@@ -316,7 +362,6 @@ function onStudentSelectChange(){
   }
 }
 
-// เปิดป๊อปอัปยืนยัน
 function openConfirmModal(){
   const studentSection = document.getElementById('student');
   if(studentSection.classList.contains('hidden')){
@@ -341,7 +386,6 @@ function openConfirmModal(){
   document.getElementById('confirmModal').classList.remove('hidden');
 }
 
-// ปิดป๊อปอัปยืนยัน
 function closeConfirmModal(){
   const modal = document.getElementById('confirmModal');
   if(modal){
@@ -630,7 +674,6 @@ function exportSummary(){
 
 window.onload = function(){
   initScoreGroups();
-  render();
   renderScoreTable();
   updateStudentDropdown();
 };
